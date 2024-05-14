@@ -1,24 +1,27 @@
+# Copyright 2024 TII (SSRC) and the Ghaf contributors
+# SPDX-License-Identifier: Apache-2.0
 {
+  config,
+  pkgs,
   lib,
-  stdenv,
-  pkg-config,
-  gpsd,
-}:
-stdenv.mkDerivation rec {
-  pname = "test_app";
-  version = "v0.1";
-
-  src = ./src;
-  nativeBuildInputs = [pkg-config];
-
-  buildInputs = [
-    gpsd
-  ];
-
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/bin
-    cp ./test_app $out/bin
-    runHook postInstall
-  '';
-}
+  ...
+}: let
+  cfg = config.test-app;
+  app-pkg = pkgs.callPackage ./pkg/test_app.nix {};
+in
+  with lib; {
+    options.test-app = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          If enabled, Test app module will be installed
+        '';
+      };
+    };
+    config = mkIf cfg.enable {
+      environment.systemPackages = [
+        app-pkg
+      ];
+    };
+  }
