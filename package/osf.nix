@@ -1,8 +1,8 @@
 {
   lib,
+  pkgs,
   stdenv,
   pkg-config,
-  pkgs,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
   fw = ./firmware;
   
   nativeBuildInputs = [pkg-config];
-  buildInputs = [ bash ];
+  buildInputs = [ pkgs.bash ];
 
   installPhase = ''
     runHook preInstall
