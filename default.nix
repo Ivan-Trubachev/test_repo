@@ -26,7 +26,7 @@ in
       ];
 
     systemd.services.test_app = {
-      enable = false;
+      enable = true;
       description = "Test_app_service";
       wantedBy = [ "default.target" ];
       serviceConfig.After = [ "dbus.service" ];
