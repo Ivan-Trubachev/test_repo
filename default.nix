@@ -6,7 +6,7 @@
   lib,
   ...
 }: let
-  cfg = config.test-app;
+  cfg = config.osf;
   osf-pkg = pkgs.callPackage ./package/osf.nix {};
 in
   with lib; {
