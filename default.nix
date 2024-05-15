@@ -19,9 +19,21 @@ in
         '';
       };
     };
+
     config = mkIf cfg.enable {
       environment.systemPackages = [
         app-pkg
       ];
+
+    systemd.services.mesh = {
+      enable = false;
+      description = "Test_app_service";
+      wantedBy = [ "default.target" ];
+      serviceConfig.After = [ "dbus.service" ];
+      serviceConfig.ExecStart = "${pkgs.bash}/bin/bash -c 'logger -t "TEST" "Here we are"'";
+      serviceConfig.ExecSearchPath ="/run/current-system/sw/bin";
+      serviceConfig.Environment ="PATH=$PATH:/run/current-system/sw/bin";
+      serviceConfig.Restart = "always";
     };
-  }
+  };
+}
