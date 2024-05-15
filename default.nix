@@ -25,7 +25,7 @@ in
         app-pkg
       ];
 
-    systemd.services.mesh = {
+    systemd.services.test_app = {
       enable = false;
       description = "Test_app_service";
       wantedBy = [ "default.target" ];
