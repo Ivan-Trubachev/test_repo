@@ -17,9 +17,9 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
 
-    # mkdir -p $out/bin
-    # cp tunslip6 $out/bin
-    # cp slipcmd $out/bin
+    mkdir -p $out/bin
+    cp tunslip6 $out/bin
+    cp slipcmd $out/bin
 
     # # Export scripts
     # cp -r $service/* $out/bin
