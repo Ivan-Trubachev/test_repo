@@ -4,7 +4,7 @@ CXXFLAGS = -Wall -Wextra -pedantic
 all: test_app
 
 test_app: test_app.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ -lgps -lm
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lm
 
 test_app.o: test_app.c
 	$(CXX) $(CXXFLAGS) -c $<
