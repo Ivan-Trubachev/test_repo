@@ -2,6 +2,7 @@
   lib,
   stdenv,
   pkg-config,
+  pkgs,
   ...
 }:
 stdenv.mkDerivation rec {
