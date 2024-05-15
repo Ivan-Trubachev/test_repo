@@ -7,30 +7,30 @@
   ...
 }: let
   cfg = config.test-app;
-  app-pkg = pkgs.callPackage ./pkg/test_app.nix {};
+  osf-pkg = pkgs.callPackage ./package/osf.nix {};
 in
   with lib; {
-    options.test-app = {
+    options.osf = {
       enable = mkOption {
         type = types.bool;
         default = true;
         description = ''
-          If enabled, Test app module will be installed
+          If enabled, OSF module will be installed
         '';
       };
     };
 
     config = mkIf cfg.enable {
       environment.systemPackages = [
-        app-pkg
+        osf-pkg
       ];
 
-    systemd.services.test_app = {
-      enable = true;
-      description = "Test_app_service";
+    systemd.services.osf = {
+      enable = false;
+      description = "OSF service";
       wantedBy = [ "default.target" ];
       serviceConfig.After = [ "dbus.service" ];
-      serviceConfig.ExecStart = "${pkgs.bash}/bin/bash -c 'logger -t \"TEST\" \"Here we are\"'";
+      serviceConfig.ExecStart = "${pkgs.bash}/bin/bash -c '${osf-pkg}/bin/osf_control.sh setup";
       serviceConfig.ExecSearchPath ="/run/current-system/sw/bin";
       serviceConfig.Environment ="PATH=$PATH:/run/current-system/sw/bin";
       serviceConfig.Restart = "always";
