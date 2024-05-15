@@ -2,7 +2,7 @@
   lib,
   stdenv,
   pkg-config,
-  gpsd,
+  ...
 }:
 stdenv.mkDerivation rec {
   pname = "test_app";
@@ -10,10 +10,6 @@ stdenv.mkDerivation rec {
 
   src = ./src;
   nativeBuildInputs = [pkg-config];
-
-  buildInputs = [
-    gpsd
-  ];
 
   installPhase = ''
     runHook preInstall
