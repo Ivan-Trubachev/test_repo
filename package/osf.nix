@@ -21,15 +21,15 @@ stdenv.mkDerivation rec {
     cp tunslip6 $out/bin
     cp slipcmd $out/bin
 
-    # # Export scripts
-    # cp -r $service/* $out/bin
-    # chmod +x $out/bin/osf_control.sh
-    # ln -s $out/bin/osf_control.sh $out/bin/osf_control
-    # patchShebangs $out/bin
+    # Export scripts
+    cp -r $service/* $out/bin
+    chmod +x $out/bin/osf_control.sh
+    ln -s $out/bin/osf_control.sh $out/bin/osf_control
+    patchShebangs $out/bin
 
-    # # Copy firmware
-    # mkdir -p $out/lib/firmware/osf/nrf52
-    # cp -r $fw/nrf52/* $out/lib/firmware/osf/nrf52
+    # Copy firmware
+    mkdir -p $out/lib/firmware/osf/nrf52
+    cp -r $fw/nrf52/* $out/lib/firmware/osf/nrf52
 
   '';
 }
