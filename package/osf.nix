@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
     patchShebangs $out/bin
 
     # Copy firmware
-    mkdir -p $out/lib/firmware/osf/nrf52A
+    mkdir -p $out/lib/firmware/osf/nrf52
     cp -r ${fw}/nrf52/* $out/lib/firmware/osf/nrf52
 
   '';
