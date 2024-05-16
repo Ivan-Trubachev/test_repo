@@ -11,6 +11,7 @@ stdenv.mkDerivation rec {
 
   src = ./utils;
   fw = ./firmware;
+  service = ./service;
   
   nativeBuildInputs = [pkg-config];
   buildInputs = [ pkgs.bash ];
@@ -28,7 +29,7 @@ stdenv.mkDerivation rec {
     patchShebangs $out/bin
 
     # Copy firmware
-    mkdir -p $out/lib/firmware/osf/nrf52
+    mkdir -p $out/lib/firmware/osf/nrf52A
     cp -r $fw/nrf52/* $out/lib/firmware/osf/nrf52
 
   '';
