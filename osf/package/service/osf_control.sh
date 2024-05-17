@@ -64,7 +64,7 @@ set_nrf() {
   # Fetch pcb version
   . /etc/comms_pcb_version
 
-  case "$1""$2" in
+  case "$0""$1" in
   powerdown)
     [ "$COMMS_PCB_VERSION" -eq 1 ] && gpioset -p 1ms -t 0 "nrf52_en"=0
     [ "$COMMS_PCB_VERSION" -eq 1 ] && gpioset -p 1ms -t 0 "nrf53_en"=0
@@ -141,7 +141,7 @@ set_timesync() {
   # Default value - enable
   SFTS_VAL=0
 
-  if [ "$1" -eq "disable_ts" ]; then
+  if [ "$1" = "disable_ts" ]; then
     SFTS_VAL=255
   fi
 
