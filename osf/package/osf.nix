@@ -16,6 +16,12 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [pkg-config];
   buildInputs = [ pkgs.bash ];
 
+  buildPhase = ''
+    cd ${src}
+    echo $PWD
+    make
+  '';
+
   installPhase = ''
 
     mkdir -p $out/bin
