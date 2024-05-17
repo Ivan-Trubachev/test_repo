@@ -17,7 +17,6 @@ stdenv.mkDerivation rec {
   buildInputs = [ pkgs.bash ];
 
   buildPhase = ''
-    cd ${src}
     echo $PWD
     make
   '';
