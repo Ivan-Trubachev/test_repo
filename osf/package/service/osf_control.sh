@@ -391,6 +391,8 @@ setup() {
     exit 1
   fi
 
+  echo "Starting OSF service" > /dev/kmsg
+  
   # check if serial port available
   if [[ ! $(ls "$SERIALPORT") =~ "$SERIALPORT" ]] && [[ ! $(ls "$DFUSERIALPORT") =~ "$DFUSERIALPORT" ]]; then
     echo "osf serial port does not exist yet." | add_date |& tee -a "$LOG_FILE"
