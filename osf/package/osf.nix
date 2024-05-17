@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
   buildInputs = [ pkgs.bash ];
 
   buildPhase = ''
-    make -f ${src}/Makefile
+    make -f ${src}/tunslip_clipcmd/Makefile
   '';
 
   installPhase = ''
