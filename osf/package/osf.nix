@@ -17,15 +17,17 @@ stdenv.mkDerivation rec {
   buildInputs = [ pkgs.bash ];
 
   buildPhase = ''
+    cd tunslip_slipcmd
     echo $PWD
     make
+    cd ../
   '';
 
   installPhase = ''
 
     mkdir -p $out/bin
-    cp tunslip6 $out/bin
-    cp slipcmd $out/bin
+    cp tunslip_slipcmd/tunslip6 $out/bin
+    cp tunslip_slipcmd/slipcmd $out/bin
 
     # Export scripts
     cp -r ${service}/* $out/bin
