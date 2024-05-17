@@ -14,6 +14,7 @@ BAUDRATE=460800
 DFUBAUDRATE=115200
 
 # Log file
+LOG_DIR=/home/ghaf/log/
 LOG_FILE=/home/ghaf/log/osf52.log
 
 # osf interface check interval
@@ -44,6 +45,17 @@ PHY_IEEE=15
 # variables
 FWVER=0
 FWVERSION=0
+
+#######################################
+# Checks log file existence and creates if needed
+#######################################
+log_setup()
+{
+  if [ ! -f $LOG_FILE ]; then
+    mkdir -p $LOG_DIR &>/dev/null
+    touch $LOG_FILE &>/dev/null
+  fi
+}
 
 #######################################
 # Controls nrf IO lines
@@ -129,7 +141,7 @@ set_timesync() {
   # Default value - enable
   SFTS_VAL=0
 
-  if [ "$1" -eq "disable_ts" ]
+  if [ "$1" -eq "disable_ts" ]; then
     SFTS_VAL=255
   fi
 
@@ -369,7 +381,7 @@ fw_update() {
 setup() {
   # check input parameters
   if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
-    echo "Usage : osf52_setup.sh suodev tundev suodfudev" | add_date |& tee -a "$LOG_FILE"
+    echo "Usage : setup siodev tundev suodfudev" | add_date |& tee -a "$LOG_FILE"
     exit 1
   fi
 
@@ -584,13 +596,15 @@ setup() {
   done
 }
 
-if [ "$1" -eq "setup" ] ; then
+log_setup
+
+if [ "$1" = "setup" ] ; then
   setup "$2" "$3" "$4" "$5" "$6" "$7" "$8"
-elif [ "$1" -eq "enable_ts" ] || [ "$1" -eq "disable_ts" ] ; then
+elif [ "$1" = "enable_ts" ] || [ "$1" = "disable_ts" ] ; then
   set_timesync "$1"
-elif [ "$1" -eq "nrf" ] ; then
+elif [ "$1" = "nrf" ] ; then
   set_nrf "$1" "$2"
-elif [ "$1" -eq "help" ] ; then
+else
   echo "osf_control - tool to control elements of osf service"
   echo "Usage:"
   echo " $0 setup [siodev] [tundev] <extra params ...> - perform osf service setup"
