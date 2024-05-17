@@ -380,6 +380,7 @@ fw_update() {
 #######################################
 setup() {
   # check input parameters
+  echo "ARGS $1 | $2 | $3"
   if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     echo "Usage : setup siodev tundev suodfudev" | add_date |& tee -a "$LOG_FILE"
     exit 1

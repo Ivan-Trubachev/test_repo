@@ -30,7 +30,7 @@ in
       description = "OSF service";
       wantedBy = [ "default.target" ];
       serviceConfig.After = [ "dbus.service" ];
-      serviceConfig.ExecStart = "${pkgs.bash}/bin/bash -c '${osf-pkg}/bin/osf_control.sh setup";
+      serviceConfig.ExecStart = "osf_control.sh setup /dev/nrf0 osf0 /dev/nrfdfu0";
       serviceConfig.ExecSearchPath ="/run/current-system/sw/bin";
       serviceConfig.Environment ="PATH=$PATH:/run/current-system/sw/bin";
       serviceConfig.Restart = "always";
