@@ -64,7 +64,7 @@ set_nrf() {
   # Fetch pcb version
   . /etc/comms_pcb_version
 
-  case "$0""$1" in
+  case "$1""$2" in
   powerdown)
     [ "$COMMS_PCB_VERSION" -eq 1 ] && gpioset -p 1ms -t 0 "nrf52_en"=0
     [ "$COMMS_PCB_VERSION" -eq 1 ] && gpioset -p 1ms -t 0 "nrf53_en"=0
@@ -603,7 +603,7 @@ if [ "$1" = "setup" ] ; then
 elif [ "$1" = "enable_ts" ] || [ "$1" = "disable_ts" ] ; then
   set_timesync "$1"
 elif [ "$1" = "nrf" ] ; then
-  set_nrf "$1" "$2"
+  set_nrf "$2" "$3"
 else
   echo "osf_control - tool to control elements of osf service"
   echo "Usage:"
