@@ -29,7 +29,7 @@ in
       enable = true;
       description = "OSF service";
       wantedBy = [ "default.target" ];
-      after = [ "cmio.service" ];
+      after = [ "dbus.service" ];
       serviceConfig.ExecStart = "osf_control.sh setup /dev/nrf0 osf0 /dev/nrfdfu0";
       serviceConfig.ExecSearchPath ="/run/current-system/sw/bin";
       serviceConfig.Environment ="PATH=$PATH:/run/current-system/sw/bin";
