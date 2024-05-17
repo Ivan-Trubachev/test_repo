@@ -1,5 +1,5 @@
 {
-  description = "nixos-software";
+  description = "osf-package";
 
   outputs = _: {
     nixosModules = {
