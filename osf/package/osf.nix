@@ -25,7 +25,7 @@ stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-
+    # Copy binaries
     mkdir -p $out/bin
     cp tunslip_slipcmd/tunslip6 $out/bin
     cp tunslip_slipcmd/slipcmd $out/bin
