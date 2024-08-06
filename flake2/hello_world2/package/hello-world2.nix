@@ -6,7 +6,7 @@
   ...
 }:
 stdenv.mkDerivation rec {
-  pname = "Hello-world1";
+  pname = "Hello-world2";
   version = "v0.1";
 
   src = ./utils;
@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   buildInputs = [ pkgs.bash ];
 
   buildPhase = ''
-    cd hello_world1
+    cd hello_world2
     echo $PWD
     make
     cd ../
@@ -24,6 +24,6 @@ stdenv.mkDerivation rec {
   installPhase = ''
     # Copy binaries
     mkdir -p $out/bin
-    cp hello_world1/hello_world1 $out/bin
+    cp hello_world2/hello_world2 $out/bin
   '';
 }
