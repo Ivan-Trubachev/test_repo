@@ -10,9 +10,6 @@ stdenv.mkDerivation rec {
   version = "v0.1";
 
   src = ./utils;
-  firmware = ./firmware;
-  service = ./service;
-  tests = ./tests;
   
   nativeBuildInputs = [pkg-config];
   buildInputs = [ pkgs.bash ];
