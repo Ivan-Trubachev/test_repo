@@ -4,6 +4,7 @@
   stdenv,
   fetchFromGitHub,
   kernel,
+  ...
 }:
 stdenv.mkDerivation rec {
   pname = "mwifiex";
@@ -33,10 +34,15 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  postInstall = ''
+  preInstall = ''
     mkdir -p $out/lib/firmware
 
     cp -r $firmware/* $out/lib/firmware
+  '';
+
+  services.udev.extraRules = ''
+    # AW-CM358SM wifi module
+    SUBSYSTEM=="net", DEVPATH=="*/mmc0:0001/mmc0:0001:1/net/sta0", ACTION=="add", NAME:="wlan1"
   '';
 
   meta = with lib; {
