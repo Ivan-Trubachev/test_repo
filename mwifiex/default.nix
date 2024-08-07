@@ -7,13 +7,13 @@
   ...
 }: let
   cfg = config.nxp.mwifiex-drv;
-  mwifiex-drv = config.boot.kernelPackages.callPackage ./packages/mwifiex {};
+  mwifiex-drv = config.boot.kernelPackages.callPackage ./packages/mwifiex.nix {};
 in
   with lib; {
     options.nxp.mwifiex-drv = {
       enable = mkOption {
         type = types.bool;
-        default = false;
+        default = true;
         description = ''
           If enabled, NXP driver for AzureWave CM358 driver modules will be installed
         '';
