@@ -6,23 +6,21 @@
   lib,
   ...
 }: let
-  cfg = config.hello-world2;
-  helloworld2-pkg = pkgs.callPackage ./package/hello-world2.nix {};
+  cfg = config.nrc-drv;
+  nrc-drv = pkgs.callPackage ./package/nrc-drv.nix {};
 in
   with lib; {
-    options.hello-world2 = {
+    options.nrc-drv = {
       enable = mkOption {
         type = types.bool;
         default = true;
         description = ''
-          If enabled, hello world module will be installed
+          If enabled, NRC7292 driver will be installed
         '';
       };
     };
 
     config = mkIf cfg.enable {
-      environment.systemPackages = [
-        helloworld2-pkg
-      ];
-  };
+         boot.extraModulePackages = [ nrc-drv ];
+    };
 }

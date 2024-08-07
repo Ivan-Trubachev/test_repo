@@ -1,0 +1,250 @@
+From db6c0e6c896b98b4b4f444d2abbe67cdc4698318 Mon Sep 17 00:00:00 2001
+From: Ivan Trubachev <ivan.trubachev@tii.ae>
+Date: Fri, 2 Aug 2024 17:38:17 +0400
+Subject: [PATCH] Fix NRC init error messages
+
+---
+ nrc-hif-cspi.c | 76 +++++++++++++++++++-----------
+ nrc-ssp.c      | 10 ++--
+ 2 files changed, 56 insertions(+), 30 deletions(-)
+
+diff --git a/nrc-hif-cspi.c b/nrc-hif-cspi.c
+index d8d3e6ddb136..de29b07c7135 100644
+--- a/nrc-hif-cspi.c
++++ b/nrc-hif-cspi.c
+@@ -395,8 +395,11 @@ static int _c_spi_read_regs(struct spi_device *spi,
+ 	}
+ 
+ #ifndef CONFIG_SPI_HALF_DUPLEX
+-	if (WARN_ON_ONCE(rx[7] != C_SPI_ACK)) {
+-		nrc_common_dbg("[%s] try to read register but SPI ACK is invalid\n", __func__);
++	/* No need to use WARN_ONCE, 
++	we know that spi might fail at boot, 
++	so we restart the device */  
++	if (rx[7] != C_SPI_ACK) {
++		pr_err("[%s] try to read register but SPI ACK is invalid\n", __func__);
+ 		return -EIO;
+ 	}
+ #endif
+@@ -440,10 +443,12 @@ static int _c_spi_write_reg(struct spi_device *spi, u8 addr, u8 data)
+ 	}
+ 
+ #ifndef CONFIG_SPI_HALF_DUPLEX
+-	/* In case of spi reset, skip a process for confirming spi ack */
++	/* No need to use WARN_ONCE, 
++	we know that spi might fail at boot, 
++	so we restart the device */  
+ 	if (C_SPI_WDATA(data) != 0xC8) {
+-		if (WARN_ON_ONCE(rx[7] != C_SPI_ACK)) {
+-			nrc_common_dbg("[%s] try to read register but SPI ACK is invalid\n", __func__);
++		if (rx[7] != C_SPI_ACK) {
++			pr_err("[%s] try to read register but SPI ACK is invalid\n", __func__);
+ 			return -EIO;
+ 		}
+ 	}
+@@ -488,8 +493,11 @@ static ssize_t _c_spi_read(struct spi_device *spi, u8 *buf, ssize_t size)
+ 	}
+ 
+ #ifndef CONFIG_SPI_HALF_DUPLEX
+-	if (WARN_ON_ONCE(rx[7] != C_SPI_ACK)) {
+-		nrc_common_dbg("[%s] try to read register but SPI ACK is invalid\n", __func__);
++	/* No need to use WARN_ONCE, 
++		we know that spi might fail at boot, 
++		so we restart the device */  
++	if (rx[7] != C_SPI_ACK) {
++		pr_err("[%s] try to read register but SPI ACK is invalid\n", __func__);
+ 		return -EIO;
+ 	}
+ #endif
+@@ -535,9 +543,12 @@ static ssize_t _c_spi_write(struct spi_device *spi, u8 *buf, ssize_t size)
+ 	}
+ 
+ #ifndef CONFIG_SPI_HALF_DUPLEX
+-	if (WARN_ON_ONCE(rx[7] != C_SPI_ACK))
++	/* No need to use WARN_ONCE, 
++		we know that spi might fail at boot, 
++		so we restart the device */  
++	if (rx[7] != C_SPI_ACK)
+ 	{
+-		// nrc_common_dbg("[%s] try to read register but SPI ACK is invalid\n", __func__);
++		pr_err("[%s] try to read register but SPI ACK is invalid\n", __func__);
+ 		return -EIO;
+ 	}
+ #endif
+@@ -2458,7 +2469,7 @@ static void nrc_cspi_free (struct nrc_spi_priv *priv)
+ 	kfree(priv);
+ }
+ 
+-#define MAX_RETRY_CNT  3
++#define MAX_RETRY_CNT  20
+ static int nrc_cspi_probe(struct spi_device *spi)
+ {
+ 	struct nrc *nw;
+@@ -2495,6 +2506,7 @@ static int nrc_cspi_probe(struct spi_device *spi)
+ 	if (fw_name) nrc_hif_reset_device(hdev);
+ 	ret = nrc_hif_probe(hdev);
+ 	if (ret && retry < MAX_RETRY_CNT) {
++		msleep(200);
+ 		retry++;
+ 		goto try;
+ 	}
+@@ -2611,21 +2623,19 @@ static int __spi_controller_match(struct device *dev, const void *data)
+ 	return ctlr->bus_num == *bus_num;
+ }
+ 
+-static struct spi_controller *spi_busnum_to_master(u16 bus_num)
++static struct spi_controller *spi_busnum_to_master(u16 bus_num, struct platform_device **pdev)
+ {
+-	struct platform_device *pdev = NULL;
+ 	struct spi_master *master = NULL;
+ 	struct spi_controller *ctlr = NULL;
+ 	struct device *dev = NULL;
+ 	
+-	pdev = platform_device_alloc("pdev", PLATFORM_DEVID_NONE);
+-	pdev->num_resources = 0;
+-	platform_device_add(pdev);
++	*pdev = platform_device_alloc("pdev", PLATFORM_DEVID_NONE);
++	(*pdev)->num_resources = 0;
++	platform_device_add(*pdev);
+ 	
+-	master = spi_alloc_master(&pdev->dev, sizeof(void *));
++	master = spi_alloc_master(&(*pdev)->dev, sizeof(void *));
+ 	if (!master) {
+ 		pr_err("Error: failed to allocate SPI master device\n");
+-		platform_device_put(pdev);
+ 		return NULL;
+ 	}
+     
+@@ -2635,15 +2645,15 @@ static struct spi_controller *spi_busnum_to_master(u16 bus_num)
+ 	}
+ 	
+ 	spi_master_put(master);
+-	platform_device_put(pdev);
+-	
+ 	return ctlr;
+ }
+ #endif
+ 
++struct platform_device *g_pdev = NULL;
++
+ static struct spi_device *nrc_create_spi_device (void)
+ {
+-	struct spi_master *master;
++	struct spi_master *master = NULL;
+ 	struct spi_device *spi;
+ 
+ 	/* Apply module parameters */
+@@ -2653,10 +2663,11 @@ static struct spi_device *nrc_create_spi_device (void)
+ 	bi.max_speed_hz = hifspeed;
+ 
+ 	/* Find the spi master that our device is attached to */
+-	master = spi_busnum_to_master(spi_bus_num);
++	master = spi_busnum_to_master(spi_bus_num, &g_pdev);
+ 	if (!master) {
+-		pr_err("Could not find spi master with the bus number %d.",
+-			spi_bus_num);
++		pr_err("Could not find spi master with the bus number %d.", spi_bus_num);
++		platform_device_del(g_pdev);
++		g_pdev = NULL;
+ 		return NULL;
+ 	}
+ 
+@@ -2664,6 +2675,8 @@ static struct spi_device *nrc_create_spi_device (void)
+ 	spi = spi_new_device(master, &bi);
+ 	if (!spi) {
+ 		pr_err("Failed to instantiate a new spi device.");
++		platform_device_del(g_pdev);
++		g_pdev = NULL;
+ 		return NULL;
+ 	}
+ 
+@@ -2676,7 +2689,7 @@ static struct spi_device *nrc_create_spi_device (void)
+ }
+ #endif
+ 
+-struct spi_device *g_spi_dev;
++struct spi_device *g_spi_dev = NULL;
+ 
+ static int __init nrc_cspi_init (void)
+ {
+@@ -2687,7 +2700,7 @@ static int __init nrc_cspi_init (void)
+ 
+ #ifndef CONFIG_SPI_USE_DT
+ 	spi = nrc_create_spi_device();
+-	if (IS_ERR(spi)) {
++	if ((spi == NULL )|| IS_ERR(spi)) {
+ 		pr_err("Failed to nrc_create_spi_dev\n");
+ 		goto out;
+ 	}
+@@ -2714,10 +2727,19 @@ static int __init nrc_cspi_init (void)
+ 
+ static void __exit nrc_cspi_exit (void)
+ {
++	pr_info("nrc_cspi_exit");
++	if (g_spi_dev)
++	{
+ #ifndef CONFIG_SPI_USE_DT
+-	spi_unregister_device(g_spi_dev);
++		spi_unregister_device(g_spi_dev);
+ #endif
+-	spi_unregister_driver(&nrc_cspi_driver);
++		spi_unregister_driver(&nrc_cspi_driver);
++	}
++
++	if (g_pdev)
++	{
++		platform_device_del(g_pdev);
++	}
+ }
+ 
+ module_init(nrc_cspi_init);
+diff --git a/nrc-ssp.c b/nrc-ssp.c
+index c463d9323401..c6b5d116abeb 100644
+--- a/nrc-ssp.c
++++ b/nrc-ssp.c
+@@ -576,6 +576,7 @@ int nrc_ssp_register(struct nrc_hif_ssp *hif)
+ 	int ret = 0;
+ 	struct spi_device *spi;
+ 	struct spi_master *master;
++	struct platform_device *pdev = NULL;
+ 
+ 	nrc_dbg(NRC_DBG_HIF, "%s()", __func__);
+ 
+@@ -589,11 +590,11 @@ int nrc_ssp_register(struct nrc_hif_ssp *hif)
+ 	bi.max_speed_hz = hifspeed;
+ 
+ 	/* Find the spi master that our device is attached to */
+-	master = spi_busnum_to_master(spi_bus_num);
++	master = spi_busnum_to_master(spi_bus_num, &pdev);
+ 	if (!master) {
+ 		nrc_dbg(NRC_DBG_HIF,
+-			"could not find spi master with busnum=%d\n",
+-			spi_bus_num);
++			"could not find spi master with busnum=%d\n", spi_bus_num);
++		platform_device_del(pdev);
+ 		goto fail;
+ 	}
+ 
+@@ -601,6 +602,7 @@ int nrc_ssp_register(struct nrc_hif_ssp *hif)
+ 	spi = spi_new_device(master, &bi);
+ 	if (!spi) {
+ 		nrc_dbg(NRC_DBG_HIF, "failed to add spi device\n");
++		platform_device_del(pdev);
+ 		goto fail;
+ 	}
+ 
+@@ -611,9 +613,11 @@ int nrc_ssp_register(struct nrc_hif_ssp *hif)
+ 	if (ret < 0) {
+ 		nrc_dbg(NRC_DBG_HIF, "failed to register driver %s\n",
+ 			ssp_driver.driver.name);
++		platform_device_del(pdev);
+ 		goto unregister_device;
+ 	}
+ 
++	platform_device_put(pdev);
+ 	return ret;
+ 
+ unregister_device:
+-- 
+2.44.0
+

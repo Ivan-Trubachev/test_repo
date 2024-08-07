@@ -1,9 +1,7 @@
 {
-  description = "osf-nixpkg";
+  description = "newracom-flake";
 
   outputs = _: {
-    nixosModules = {
-      osf = import ./osf;
-    };
+      nrc_driver = import ./nrc_driver;
   };
 }
