@@ -1,0 +1,39 @@
+diff --git a/Makefile b/Makefile
+index bf5c5cb..dcf6ed5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -18,7 +18,7 @@
+ 
+ CONFIG_COMPATDIR=n
+ ifeq ($(CONFIG_COMPATDIR), y)
+-COMPATDIR=/lib/modules/$(KERNELVERSION_X86)/build/compat-wireless-3.2-rc1-1/include
++COMPATDIR=$(NIX_KERNEL_DEV)/lib/modules/$(KERNELVERSION_X86)/build/compat-wireless-3.2-rc1-1/include
+ CC ?=		$(CROSS_COMPILE)gcc -I$(COMPATDIR)
+ endif
+ 
+@@ -348,11 +348,11 @@ ifeq ($(CONFIG_MAC80211_SUPPORT_MESH),y)
+ endif
+ 
+ # add -Wno-packed-bitfield-compat when GCC version greater than 4.4
+-GCC_VERSION := $(shell echo `gcc -dumpversion | cut -f1-2 -d.` \>= 4.4 | sed -e 's/\./*100+/g' | bc )
++GCC_VERSION := $(shell echo `$(CC) -dumpversion | cut -f1-2 -d.` \>= 4.4 | sed -e 's/\./*100+/g' | bc )
+ ifeq ($(GCC_VERSION),1)
+ 	ccflags-y += -Wno-packed-bitfield-compat
+ endif
+-WimpGCC_VERSION := $(shell echo `gcc -dumpversion | cut -f1 -d.`| bc )
++WimpGCC_VERSION := $(shell echo `$(CC) -dumpversion | cut -f1 -d.`| bc )
+ ifeq ($(shell test $(WimpGCC_VERSION) -ge 7; echo $$?),0)
+ ccflags-y += -Wimplicit-fallthrough=3
+ endif
+@@ -652,9 +652,8 @@ ifneq ($(APPDIR),)
+ endif
+ #ifdef SDIO
+ #endif // SDIO
+-
+-install: default
+-
++install: 
++	mkdir -p $(INSTALLDIR)
+ 	cp -f mlan.$(MODEXT) $(INSTALLDIR)/mlan$(DBG).$(MODEXT)
+ 	cp -f moal.$(MODEXT) $(INSTALLDIR)/moal$(DBG).$(MODEXT)
+ 	echo $(INSTALLDIR)
