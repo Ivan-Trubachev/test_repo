@@ -4,7 +4,8 @@
   fetchFromGitHub,
   kernel,
   kmod,
-  bc
+  bc,
+  ...
 }:
 stdenv.mkDerivation rec {
   pname = "nrc7292";
@@ -20,6 +21,7 @@ stdenv.mkDerivation rec {
   hardeningDisable = [ "pic" ];
   nativeBuildInputs = [ bc ] ++ kernel.moduleBuildDependencies;
 
+  firmware = ./firmware;
 
   patches = [
      # Fix install rules and add 6.1 kernel support
@@ -29,6 +31,9 @@ stdenv.mkDerivation rec {
 
   preInstall = ''
     mkdir -p "$out/lib/modules/${kernel.modDirVersion}/kernel/net/wireless/"
+    mkdir -p $out/lib/firmware
+
+    cp -r $firmware/* $out/lib/firmware
   '';
 
   prePatch = ''
