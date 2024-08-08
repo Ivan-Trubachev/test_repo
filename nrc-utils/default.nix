@@ -33,7 +33,7 @@
       description = "NRC7292 Software Package for Host mode (CLI App)";
       homepage = "https://github.com/newracom/nrc7292_sw_pkg";
       license = licenses.gpl2Only;
-      maintainers = with lib.maintainers;[ ivant ];
+      maintainers = with lib.maintainers;[ IvanTrubachev ];
       platforms = with lib.platforms; linux;
     };
   };
