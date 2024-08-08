@@ -59,6 +59,7 @@
     meta = with lib; {
       description = "NRC7292 Software Package for Host mode (Linux OS)";
       homepage = "https://github.com/newracom/nrc7292_sw_pkg";
+      maintainers = with lib.maintainers;[ IvanTrubachev ];
       license = licenses.gpl2Only;
       platforms = platforms.linux;
     };
